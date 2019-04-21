@@ -1,5 +1,5 @@
 function parseSelector(selector) {
-  if (!selector_str) throw "selector required";
+  if (!selector) throw "selector required";
 	if (typeof selector !== 'string') throw "Selector should be string";
 	return selector.split(".").filter(d=>d);
 }
@@ -13,8 +13,8 @@ function stepInto(obj, arg, force_dig){
 
 function lastObj(obj, args, force_dig=true){
 	if (args.length > 0){
-		let inner_obj = stepInto(obj, args.shift());
-		return lastObj(inner_obj, args, force_dig);
+		let inner_obj = stepInto(obj, args.shift(), force_dig);
+		return lastObj(inner_obj, args);
 	} else {
 		return obj;
 	}
@@ -40,4 +40,16 @@ function deepGet(obj, selector){
 module.exports = {
   deepSet,
   deepGet,
+}
+
+if (require.main === module) {
+	let a;
+	
+	a = {};
+	deepSet( a, "b.c.d", 10);
+	console.log(a);
+
+	a = { b: { c: 20}};
+	console.log(deepGet( a, "b.c"));
+	console.log(deepGet( a, "b.c.d.e")); // throw
 }
