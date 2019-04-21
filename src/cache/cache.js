@@ -30,17 +30,36 @@ function cacheEach( fn, {timeout_ms = 5 * 1000, async = false} = {}) {
 
 function cacheBulk( refresh, {timeout_ms = 5 * 1000} = {} ) {
   // cache : {arg1: result1, arg2: result2} .. 
+  if (timeout_ms < 1000) throw "really want to refresh cache less than a second? Comment this line if so.";
   let cache = this._cache = null;
   let timer = this._timer = null;
 
-  const _doRefresh = async ()=> cache = await refresh();
-  if (timeout_ms === false) _doRefresh();
-  else setInterval( _doRefresh, timeout_ms);
+  const _doRefresh = async () => cache = await refresh();
+  _doRefresh(); // the result<Promise> can be used as ready flag.
+  if (timeout_ms) setInterval( _doRefresh, timeout_ms);
 
-  return (arg) => cache[arg];
+  return (arg) => (cache) ? cache[arg] : null;
 }
 
 module.exports = {
   cacheEach,
   cacheBulk,
 };
+
+
+//simple test and usage
+if (require.main === module) {
+  const update = () => { 
+    console.log("updated");
+    return {c1:10, c2:{data:20}}; 
+  };
+  const fn_cached = cacheBulk(update);
+  
+  console.log(fn_cached("c1"));
+  console.log(fn_cached("c10000"));
+  setTimeout(()=>{
+    console.log(fn_cached("c1"));
+    console.log(fn_cached("c2"));
+    console.log(fn_cached("c10000"));
+  }, 1000);
+}
