@@ -29,10 +29,18 @@ function cacheEach( fn, {timeout_ms = 5 * 1000, async = false} = {}) {
 }
 
 function cacheBulk( refresh, {timeout_ms = 5 * 1000} = {} ) {
-  //fn : 한번에 모든 데이터를 넣는 함수. 결과는 {a: , b: } ... 이고 함수는 a, b 같은 하나의 key로 결과 조회.
+  // cache : {arg1: result1, arg2: result2} .. 
+  let cache = this._cache = null;
+  let timer = this._timer = null;
+
+  const _doRefresh = async ()=> cache = await refresh();
+  if (timeout_ms === false) _doRefresh();
+  else setInterval( _doRefresh, timeout_ms);
+
+  return (arg) => cache[arg];
 }
 
 module.exports = {
-  cacheEachReturn,
-  cacheBulkRefresh,
+  cacheEach,
+  cacheBulk,
 };
