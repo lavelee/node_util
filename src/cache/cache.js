@@ -5,9 +5,8 @@ function cacheEach( fn, {timeout_ms = 5 * 1000, async = false} = {}) {
 
   const _updateTimeout = (arg) => {
     if (timeout_ms === false) return;
-    if (timer[arg]){
+    if (cache[arg] !== undefined){
       clearTimeout(timer[arg]);
-      delete timer[arg];
       _updateTimeout(arg);
     } else {
       timer[arg] = setTimeout(() => {
